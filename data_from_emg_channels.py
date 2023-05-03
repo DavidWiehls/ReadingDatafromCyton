@@ -3,11 +3,19 @@ import numpy as np
 from brainflow import BoardShim, BrainFlowInputParams, BoardIds
 import matplotlib.pyplot as plt
 from scipy.signal import butter, filtfilt
+import scipy.signal
 
 def apply_high_pass_filter(data, lowcut, fs, order=4):
     nyquist = 0.5 * fs
     low = lowcut / nyquist
     b, a = butter(order, low, btype='high')
+    filtered_data = filtfilt(b, a, data)
+    return filtered_data
+
+def apply_notch_filter(data, notch_freq, fs, q=30):
+    nyquist = 0.5 * fs
+    freq = notch_freq / nyquist
+    b, a = scipy.signal.iirnotch(freq, q)
     filtered_data = filtfilt(b, a, data)
     return filtered_data
 
@@ -55,8 +63,13 @@ while time.time() - start_time < collection_time:
         emg_data_buffer = np.hstack((emg_data_buffer, emg_data))
     # Check if we have enough data in the buffer
     if emg_data_buffer.shape[1] >= 50:
+        
         # Apply high-pass filter to remove DC offset
         filtered_emg_data = apply_high_pass_filter(emg_data_buffer, lowcut, fs)
+
+        # Apply notch filter to remove 50 Hz noise
+        notch_freq=50
+        filtered_emg_data = apply_notch_filter(filtered_emg_data, notch_freq, fs)
 
         # Update the plot with the filtered data
         for i, channel_data in enumerate(filtered_emg_data):
