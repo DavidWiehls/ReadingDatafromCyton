@@ -75,7 +75,7 @@ while time.time() - start_time < collection_time:
         for i, channel_data in enumerate(filtered_emg_data):
             ax[i].clear()
             ax[i].plot(channel_data)
-            ax[i].set_title(f'Channel {emg_channels[i] + 1}')
+            ax[i].set_title(f'Channel {emg_channels[i]}')
             ax[i].set_ylim(-250,250)
         plt.pause(0.01)
 
