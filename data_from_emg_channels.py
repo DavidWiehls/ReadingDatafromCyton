@@ -22,11 +22,6 @@ def apply_notch_filter(data, notch_freq, fs, q=30):
     filtered_data = filtfilt(b, a, data)
     return filtered_data
 
-# Check large amplitude change
-def check_large_amplitude_change(data,threshold=200):
-    delta = np.max(data) - np.min(data)
-    return delta > threshold
-
 # Initialize board
 params = BrainFlowInputParams()
 params.serial_port = 'COM3'
@@ -47,17 +42,14 @@ plt.ion()
 fig, ax = plt.subplots(4, 1, sharex=True)
 
 # Collect data for a certain amount of time (e.g., 10 seconds)
-collection_time = 30
+collection_time =60
 start_time = time.time()
 
 # Filter settings
 lowcut = 1  # Set the lowcut frequency for the high-pass filter (1 Hz is a common choice)
 fs = BoardShim.get_sampling_rate(board_id)  # Get the sampling rate of the board
-
 # Create an empty buffer for accumulating the data
 emg_data_buffer = None
-prev_filtered_emg_data = None
-threshold = 200
 
 while time.time() - start_time < collection_time:
     # Read data from the buffer
@@ -89,14 +81,7 @@ while time.time() - start_time < collection_time:
             ax[i].set_ylim(-250,250)
         plt.pause(0.01)
 
-        # Check if the amplitude change in all 4 channels exceeds the threshold
-        if prev_filtered_emg_data is not None:
-            amplitude_diff = np.abs(filtered_emg_data[:, -1] - prev_filtered_emg_data[:, -1])
-            if np.all(amplitude_diff > threshold):
-                mouse.click(button='right')
-
-        # Update the previous filtered EMG data for comparison
-        prev_filtered_emg_data = filtered_emg_data
+        
 
         # Clear the buffer
         emg_data_buffer = None
