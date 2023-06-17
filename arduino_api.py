@@ -18,7 +18,7 @@ board.digital[pin_middle].mode = SERVO
 board.digital[pin_ring].mode = SERVO
 board.digital[pin_little].mode = SERVO
 
-
+# Initial Hand Position
 def initial_position():
     board.digital[pin_thumb].write(150)
     board.digital[pin_index].write(150)
